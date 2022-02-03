@@ -8,7 +8,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        if (args.Length < 2)
+        if (args.Length < 3)
         {
             var versionString = Assembly.GetEntryAssembly()?
                                     .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
@@ -23,17 +23,32 @@ internal class Program
         }
         
         var operationMode =args[0]; 
+        if (String.IsNullOrEmpty(operationMode )) {
+            Console.WriteLine("ERROR: You need to specify a operation Mode!");
+            return; 
+        }
+
         var nspace_value = args[1];  
-        var plaintext = args[2];
+        if (String.IsNullOrEmpty(nspace_value )) {
+            Console.WriteLine("ERROR: You need to specify a namespace!");
+            return; 
+        }
+
+        var inputValue = args[2];
+        if (String.IsNullOrEmpty(inputValue)) {
+            Console.WriteLine("ERROR: You need to specify a namespace!");
+            return; 
+        }
+
         var silenceFlag = false;
 
         if ( args.Length > 3)
-        silenceFlag = Convert.ToBoolean(args[3]);
+            silenceFlag = Convert.ToBoolean(args[3]);
 
-        MainLogic("Welcome to Data-Protector!", nspace_value, plaintext, silenceFlag, operationMode);
+        MainLogic("Welcome to Data-Protector!", nspace_value, inputValue, silenceFlag, operationMode);
     }
 
-static void MainLogic(string message, string nspace, string plaintext, bool silenceFlag, string operationMode  )
+static void MainLogic(string message, string nspace, string inputValue, bool silenceFlag, string operationMode  )
 {
     string logo = $"\n        \t{message}";
     logo += @"
@@ -69,10 +84,10 @@ static void MainLogic(string message, string nspace, string plaintext, bool sile
     var instance = ActivatorUtilities.CreateInstance<ProtectionManager>(services, nspace); 
     switch (operationMode.ToLower() ) {
         case "e":
-            instance.Encrypt(plaintext);
+            instance.Encrypt(inputValue);
         break;
         case "d":
-            instance.Decrypt(plaintext);
+            instance.Decrypt(inputValue);
         break;
         default:
             Console.WriteLine("please provide correct operation mode 'E' or 'D'");
