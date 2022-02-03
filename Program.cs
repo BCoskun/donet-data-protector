@@ -31,6 +31,8 @@ internal class Program
 
         var dpConfigSection = configuration.GetSection(nameof(DataProtectorConfig));      
         dpConfig.KeyOutputLocation = dpConfigSection["KeyOutputLocation"];
+        dpConfig.ApplicationName = dpConfigSection["ApplicationName"];
+               
 
         var operationMode =args[0]; 
         if (String.IsNullOrEmpty(operationMode )) {
@@ -91,10 +93,14 @@ internal class Program
 
     var serviceCollection = new ServiceCollection();
     var dpservice = serviceCollection.AddDataProtection();
-    if (!String.IsNullOrEmpty(dpConfig.KeyOutputLocation))
-    {
+    if (!String.IsNullOrEmpty(dpConfig.KeyOutputLocation))    {
         dpservice.PersistKeysToFileSystem(new DirectoryInfo(dpConfig.KeyOutputLocation));
     }
+
+    if (!String.IsNullOrEmpty(dpConfig.ApplicationName)) {
+        dpservice.SetApplicationName(dpConfig.ApplicationName);
+    }
+
     var services = serviceCollection.BuildServiceProvider();
     
     var instance = ActivatorUtilities.CreateInstance<ProtectionManager>(services, nspace); 
