@@ -18,21 +18,22 @@ internal class Program
             Console.WriteLine($"data-protector v{versionString}");
             Console.WriteLine("-------------");
             Console.WriteLine("\nUsage:");
-            Console.WriteLine("  data-protector [namespace] [plaintext] [silence flag 'true' if you want to silence mode]");
+            Console.WriteLine("  data-protector [operation mode = 'E' for Encryption or 'D' for Decryption ] [namespace] [plaintext/ciphertext] [silence flag 'true' if you want to silence mode]");
             return;
         }
         
-        var nspace_value = args[0];
-        var plaintext = args[1];  
+        var operationMode =args[0]; 
+        var nspace_value = args[1];  
+        var plaintext = args[2];
         var silenceFlag = false;
 
-        if ( args.Length > 2)
-        silenceFlag = Convert.ToBoolean(args[2]);
+        if ( args.Length > 3)
+        silenceFlag = Convert.ToBoolean(args[3]);
 
-        MainLogic("Welcome to Data-Protector!", nspace_value, plaintext, silenceFlag);
+        MainLogic("Welcome to Data-Protector!", nspace_value, plaintext, silenceFlag, operationMode);
     }
 
-static void MainLogic(string message, string nspace, string plaintext, bool silenceFlag  )
+static void MainLogic(string message, string nspace, string plaintext, bool silenceFlag, string operationMode  )
 {
     string logo = $"\n        \t{message}";
     logo += @"
@@ -61,14 +62,24 @@ static void MainLogic(string message, string nspace, string plaintext, bool sile
     if (!silenceFlag)
         Console.WriteLine(logo);
 
- 
-
     var serviceCollection = new ServiceCollection();
     serviceCollection.AddDataProtection();
     var services = serviceCollection.BuildServiceProvider();
     
-    var instance = ActivatorUtilities.CreateInstance<ProtectionManager>(services, nspace);
-    instance.Encyrpt(plaintext);
+    var instance = ActivatorUtilities.CreateInstance<ProtectionManager>(services, nspace); 
+    switch (operationMode.ToLower() ) {
+        case "e":
+            instance.Encrypt(plaintext);
+        break;
+        case "d":
+            instance.Decrypt(plaintext);
+        break;
+        default:
+            Console.WriteLine("please provide correct operation mode 'E' or 'D'");
+        break;
+    }
+
+
 
 }
 
@@ -99,11 +110,18 @@ static void MainLogic(string message, string nspace, string plaintext, bool sile
         }
 */
 
-        internal void Encyrpt(string plaintext)
+        internal void Encrypt(string plaintext)
         {
             if ( String.IsNullOrEmpty(plaintext) ) throw new ArgumentException("plaintext cannot be null");            
             string protectedPayload = _protector.Protect(plaintext);
             Console.WriteLine($"{protectedPayload}");
+        }
+
+        internal void Decrypt(string ciphertext)
+        {
+            if ( String.IsNullOrEmpty(ciphertext) ) throw new ArgumentException("ciphertext cannot be null");            
+            string plaintext = _protector.Unprotect(ciphertext);
+            Console.WriteLine($"{plaintext}");
         }
     }
 
