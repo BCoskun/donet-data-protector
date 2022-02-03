@@ -120,7 +120,14 @@ static void MainLogic(string message, string nspace, string plaintext, bool sile
         internal void Decrypt(string ciphertext)
         {
             if ( String.IsNullOrEmpty(ciphertext) ) throw new ArgumentException("ciphertext cannot be null");            
-            string plaintext = _protector.Unprotect(ciphertext);
+            string plaintext = "";
+            
+            try{
+                 plaintext = _protector.Unprotect(ciphertext);
+            }catch (System.Security.Cryptography.CryptographicException) {
+
+            }
+
             Console.WriteLine($"{plaintext}");
         }
     }
