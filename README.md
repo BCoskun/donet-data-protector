@@ -1,2 +1,2 @@
-# donet-data-protector
+# dotnet-data-protector
 Simple tool (Dotnet tool ) for using data protection API from CLI
