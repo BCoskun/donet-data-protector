@@ -1,11 +1,13 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace bm3soft.data.protector;
 
 internal class Program
 {
+    static DataProtectorConfig  dpConfig   = new DataProtectorConfig();
     static void Main(string[] args)
     {
         if (args.Length < 3)
@@ -22,6 +24,14 @@ internal class Program
             return;
         }
         
+
+        IConfiguration configuration = new ConfigurationBuilder()
+       .AddJsonFile($"{Directory.GetCurrentDirectory()}/dp.json", true,false)
+       .Build();
+
+        var dpConfigSection = configuration.GetSection(nameof(DataProtectorConfig));      
+        dpConfig.KeyOutputLocation = dpConfigSection["KeyOutputLocation"];
+
         var operationMode =args[0]; 
         if (String.IsNullOrEmpty(operationMode )) {
             Console.WriteLine("ERROR: You need to specify a operation Mode!");
@@ -46,9 +56,11 @@ internal class Program
             silenceFlag = Convert.ToBoolean(args[3]);
 
         MainLogic("Welcome to Data-Protector!", nspace_value, inputValue, silenceFlag, operationMode);
+
+        
     }
 
-static void MainLogic(string message, string nspace, string inputValue, bool silenceFlag, string operationMode  )
+    static void MainLogic(string message, string nspace, string inputValue, bool silenceFlag, string operationMode  )
 {
     string logo = $"\n        \t{message}";
     logo += @"
@@ -78,7 +90,11 @@ static void MainLogic(string message, string nspace, string inputValue, bool sil
         Console.WriteLine(logo);
 
     var serviceCollection = new ServiceCollection();
-    serviceCollection.AddDataProtection();
+    var dpservice = serviceCollection.AddDataProtection();
+    if (!String.IsNullOrEmpty(dpConfig.KeyOutputLocation))
+    {
+        dpservice.PersistKeysToFileSystem(new DirectoryInfo(dpConfig.KeyOutputLocation));
+    }
     var services = serviceCollection.BuildServiceProvider();
     
     var instance = ActivatorUtilities.CreateInstance<ProtectionManager>(services, nspace); 
