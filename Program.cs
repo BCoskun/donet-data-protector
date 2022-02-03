@@ -36,7 +36,7 @@ internal class Program
 
         var inputValue = args[2];
         if (String.IsNullOrEmpty(inputValue)) {
-            Console.WriteLine("ERROR: You need to specify a namespace!");
+            Console.WriteLine("ERROR: You need to specify a input value (plaintext or ciphertext)!");
             return; 
         }
 
